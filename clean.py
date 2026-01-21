@@ -1,6 +1,17 @@
 
+import pandas as pd
+from sklearn.impute import SimpleImputer
+from sklearn.mixture import GaussianMixture
+import numpy as np
+
+
 class Cleaner:
     import pandas as pd
+    import numpy as np
+    import pandas as pd
+    from sklearn.impute import SimpleImputer
+    from sklearn.mixture import GaussianMixture
+
     def __init__(self, threshold=90):
         self.threshold = threshold
 
@@ -26,6 +37,34 @@ class Cleaner:
                   (numeric_df[col].isna().sum() / n_rows) * 100 >= 85)
         ]
         return self.cols_drop_corr
+    
+    def guassian_fit(self,x_train):
+        self.imputer = SimpleImputer(strategy='mean')
+        x_train_imputed = self.imputer.fit_transform(x_train)
+        self.gmm = GaussianMixture(n_components=3, covariance_type='full',random_state=42)
+        self.gmm.fit(x_train_imputed)
+        return self.gmm
+        
+    def gaussian_impute(self, x):
+        if self.gmm is None:
+            raise ValueError("GMM model not fitted. Call gaussian_fit first.")
+
+        x_imputed = self.imputer.transform(x)  # initial median imputation
+        resp = self.gmm.predict_proba(x_imputed)
+
+        # fill missing using weighted mean
+        for i in range(x_imputed.shape[0]):
+            missing_idx = np.isnan(x.iloc[i])
+            for j in np.where(missing_idx)[0]:
+                weighted_mean = sum(resp[i, k] * self.gmm.means_[k, j]
+                                    for k in range(self.gmm.n_components))
+                x_imputed[i, j] = weighted_mean
+
+        return pd.DataFrame(x_imputed, columns=x.columns, index=x.index)
+
+
+
+
 
     def impute_median(self, X_train, y_train) -> dict:
         X_train = X_train.copy()
@@ -51,7 +90,7 @@ class Cleaner:
                         median_val = X_train.loc[group_cond & (X_train['gender']==gender), col].median()
                         self.dic[col][key] = median_val
 
-        return self.dic
+        return self.dic 
 
     def transform_impute_median(self, df: pd.DataFrame,dic_col) -> pd.DataFrame:
         df = df.copy()
