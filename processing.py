@@ -13,6 +13,28 @@ class preprocessorCleaner(BaseEstimator, TransformerMixin):
         self.dic = {}
         self.processor = None
         self.gmm = None
+    
+
+    def scale_temp(self, temp):
+        if 30 <= temp <= 43:
+            return temp
+
+        elif 86 <= temp <= 120:
+            return (temp - 32) * 5 / 9
+
+        elif 121 <= temp < 1000:
+            return temp / 10
+    
+        elif temp > 1000 and temp < 10000:
+            return temp / 100
+    
+        elif temp >= 10000:
+            return temp / 1000
+    
+    
+        else:
+            return temp
+
 
     def fit(self, X_train: pd.DataFrame, y_train: pd.Series):
         self.columns_to_drop = self.clean.selectcol(X_train, y_train)
@@ -31,6 +53,7 @@ class preprocessorCleaner(BaseEstimator, TransformerMixin):
         train_numeric = self.clean.gaussian_impute(train_numeric)
         X_train = pd.concat([train_numeric, train_categorical], axis=1)
         self.processor.fit(X_train)
+        X_train['vitalBody temperaturemax'] = X_train['vitalBody temperaturemax'].apply(self.scale_temp)
         return self
 
     def transform(self, x: pd.DataFrame):
@@ -39,6 +62,7 @@ class preprocessorCleaner(BaseEstimator, TransformerMixin):
         x_categorical = x_cleaned.select_dtypes(include='object')
         x_numeric_imputed = self.clean.gaussian_impute(x_numeric)
         x_cleaned = pd.concat([x_numeric_imputed, x_categorical], axis=1)
+        x_cleaned['vitalBody temperaturemax'] = x_cleaned['vitalBody temperaturemax'].apply(self.scale_temp)
         x_transform = self.processor.transform(x_cleaned)
 
 

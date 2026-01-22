@@ -17,7 +17,6 @@ class Cleaner:
 
     def selectcol(self, X_train, y_train=None) -> list:
         X_train = X_train.copy()
-        X_train['SepsisLabel'] = y_train
         n_rows = X_train.shape[0]
         self.columns_to_drop = [
             col for col in X_train.columns if (X_train[col].isna().sum() / n_rows) * 100 >= self.threshold
@@ -28,12 +27,11 @@ class Cleaner:
 
     def col_corr(self, X_train, y_train) -> list:
         X_train = X_train.copy()
-        X_train['SepsisLabel'] = y_train
         numeric_df = X_train.select_dtypes(include='number')
         n_rows = X_train.shape[0]
         self.cols_drop_corr = [
             col for col in numeric_df.columns
-               if (abs(numeric_df[col].corr(numeric_df['SepsisLabel'])) < 0.09 and
+               if (abs(numeric_df[col].corr(y_train)) < 0.09 and
                   (numeric_df[col].isna().sum() / n_rows) * 100 >= 85)
         ]
         return self.cols_drop_corr
