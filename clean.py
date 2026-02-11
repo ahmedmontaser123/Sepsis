@@ -11,8 +11,7 @@ class Cleaner:
     import pandas as pd
     from sklearn.impute import SimpleImputer
     from sklearn.mixture import GaussianMixture
-
-    def __init__(self, threshold=90):
+    def __init__(self, threshold):
         self.threshold = threshold
 
     def selectcol(self, X_train, y_train=None) -> list:
@@ -25,21 +24,11 @@ class Cleaner:
         return self.columns_to_drop
 
 
-    def col_corr(self, X_train, y_train) -> list:
-        X_train = X_train.copy()
-        numeric_df = X_train.select_dtypes(include='number')
-        n_rows = X_train.shape[0]
-        self.cols_drop_corr = [
-            col for col in numeric_df.columns
-               if (abs(numeric_df[col].corr(y_train)) < 0.09 and
-                  (numeric_df[col].isna().sum() / n_rows) * 100 >= 85)
-        ]
-        return self.cols_drop_corr
-    
+       
     def guassian_fit(self,x_train):
         self.imputer = SimpleImputer(strategy='mean')
         x_train_imputed = self.imputer.fit_transform(x_train)
-        self.gmm = GaussianMixture(n_components=3, covariance_type='full',random_state=42)
+        self.gmm = GaussianMixture(n_components=2, covariance_type='full',random_state=42)
         self.gmm.fit(x_train_imputed)
         return self.gmm
         
