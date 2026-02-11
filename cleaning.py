@@ -6,6 +6,13 @@ import pandas as pd
 import numpy as np
 
 class Cleaning(BaseEstimator, TransformerMixin):
+    '''
+    Description:
+    this class to apply class cleaner to clean data in a pypline of processing and modeling
+    Methods:
+    - fit: fits the cleaner to the training data, identifying columns to drop and fitting a Gaussian Mixture Model for imputation.
+    - transform: applies the cleaning process to the input data, including dropping columns, imputing missing values, and returning the cleaned DataFrame.
+    ''' 
     def __init__(self):
         self.clean = Cleaner(threshold=50)
         self.columns_to_drop = []
@@ -25,7 +32,7 @@ class Cleaning(BaseEstimator, TransformerMixin):
         
         return self
     
-    def transform(self, x: pd.DataFrame):
+    def transform(self, x: pd.DataFrame)-> pd.DataFrame:
         x = x.drop(columns=self.columns_to_drop)
         x_numeric = x.select_dtypes(include='number')
         x_categorical = x.select_dtypes(include='object')

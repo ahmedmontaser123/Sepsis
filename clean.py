@@ -6,6 +6,21 @@ import numpy as np
 
 
 class Cleaner:
+    '''
+    Description:
+    This class is about set of function of cleanig the data by performing the following tasks:
+        1. Removing columns with a high percentage of missing values based on a specified threshold.
+        2. Fitting a Gaussian Mixture Model (GMM) to the numeric features of the training data for imputation purposes.
+        3. Imputing missing values in the numeric features using the fitted GMM, which provides a more sophisticated imputation method compared to simple mean or median imputation.
+    Methods:
+    - selectcol: Identifies columns to drop based on the percentage of missing values.
+    - guassian_fit: Fits a Gaussian Mixture Model to the numeric features of the
+        training data.
+    - gaussian_impute: Imputes missing values in the numeric features using the fitted GMM.
+    - impute_median: Imputes missing values in the numeric features using median imputation based on age and gender groups.
+    - transform_impute_median: Applies the median imputation to the specified DataFrame using the provided dictionary of median values.
+
+    '''
     import pandas as pd
     import numpy as np
     import pandas as pd
